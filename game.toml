@@ -1,0 +1,51 @@
+# Autofilled by tools/new_project_layout/probe_disc.py from your legal dump.
+# Review before shipping. Runtime quirks / overlay seeds still need hand work.
+
+[game]
+name = "Crash Team Racing"
+id = "SCUS-94426"
+players = 4
+exe = "disc/SCUS_944.26"
+disc = "disc/CTR - Crash Team Racing (USA).cue"
+load_address = "0x80010000"
+entry_pc = "0x8007793C"
+text_size = "0x0007D800"
+stack_base = "0x801FFFF0"
+
+# Digests are for data Track 01 (first BINARY FILE / TRACK 01).
+[prepare_disc]
+out_dir = "disc"
+bin_name = "CTR - Crash Team Racing (USA).bin"
+cue_name = "CTR - Crash Team Racing (USA).cue"
+boot_exe = "SCUS_944.26"
+known_sizes = [605698800]
+known_md5 = [
+  "ab95bfca8a4bb3d90daa6519acf6e944",
+]
+known_sha1 = [
+  "1bb785082def3fe25f6b46be06d4eaf33c5bc772",
+]
+
+[recompiler]
+seeds = "seeds/ghidra_funcs.txt"
+out_dir = "generated"
+strict = true
+
+[runtime]
+window_title = "Crash Team Racing Recompiled"
+memcard_dir = "saves"
+
+[video]
+renderer = "opengl"
+aspect_ratio = "4:3"
+
+[controller]
+default_mode = "digital"
+allow_hybrid = false
+
+# Online mount gate: digests + track count + optional TOC fingerprint
+# (see docs/NETPLAY.md).
+[netplay]
+require_cue = true
+required_tracks = 1
+required_disc_fp = "27c53f623a85a12e9b885af598c19544df7ef8d651ff7d4e7a2685b004a23f1d"

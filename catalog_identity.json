@@ -1,0 +1,47 @@
+{
+  "format_version": 1,
+  "game": {
+    "name": "Crash Team Racing",
+    "id": "SCUS-94426",
+    "boot_exe": "SCUS_944.26"
+  },
+  "marketing": {
+    "description": "Crash Team Racing is a kart racing game featuring popular characters from the Crash Bandicoot series. The gameplay is very similar to other kart racing video games like Mario Kart: players have to choose a character and compete against the other racers on various racetracks. The story mode allows you to choose any one of the characters to complete all the main races and beat the ultimate boss Nitrous Oxide. Each of the main races are against 7 other AI competitors with 5 boss races. There are also a few arcade modes up to 4 players.",
+    "publisher": "Naughty Dog",
+    "year": "1999",
+    "region": "USA",
+    "players": 4
+  },
+  "rom_identity": {
+    "cue_name": "CTR - Crash Team Racing (USA).cue",
+    "bin_name": "CTR - Crash Team Racing (USA).bin",
+    "track_counts": [
+      1
+    ],
+    "require_cue": true,
+    "data_track": {
+      "size": 605698800,
+      "md5": "ab95bfca8a4bb3d90daa6519acf6e944",
+      "sha1": "1bb785082def3fe25f6b46be06d4eaf33c5bc772"
+    },
+    "disc_fp": "27c53f623a85a12e9b885af598c19544df7ef8d651ff7d4e7a2685b004a23f1d"
+  },
+  "exe": {
+    "load_address": "0x80010000",
+    "entry_pc": "0x8007793C",
+    "text_size": "0x0007D800",
+    "stack_base": "0x801FFFF0"
+  },
+  "seeds": {
+    "count": 986,
+    "source": "boot_exe_jal"
+  },
+  "warnings": [
+    "cue has only 1 TRACK \u2014 Track-01-only dumps fail multi-track netplay/catalog gates; prefer a full Redump cue."
+  ],
+  "notes": [
+    "entry_pc/load_address/text_size/stack_base taken from PS-X EXE header.",
+    "seeds are first-pass boot-EXE JAL targets (+ entry); expect to grow as overlays / runtime paths are discovered.",
+    "required_disc_fp is psxrecomp-toc-v1 (matches runtime DiscIdentity)."
+  ]
+}
