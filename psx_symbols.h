@@ -32,7 +32,7 @@
 #define PSX_FN_NdIntroMeshSiblingDraw 0x800693C8u
 #define func_800693C8 NdIntroMeshSiblingDraw  /* alias */
 
-/* confirmed: Caller 0x80036F50. Loads RT from a1+40..56, ctc2 TR=0, a3=*(a1+244)+4092 (last slot of 1024-entry OT; a1+244 alternates 0x800F5D44/0x800F4D2C). Face loop AddPrim t9=a3+face_hi — look-up right flaps use face_hi≈0 → farthest bucket (gpu ot_rank 0) while additive 0x36 glow ranks ~1832, so glow blends over the flap. WoodEmit AVSZ ranks ~1200–2046. PSX_ND_SIB_OT_LIFT moves a3 (neg toward nearer); -1023 still before glow; -1024 wraps/corrupts OT. */
+/* confirmed: Caller 0x80036F50. Loads RT from a1+40..56, ctc2 TR=0, a3=*(a1+244)+4092 (main OT last slot; a1+244 alternates 0x800F5D44/0x800F4D2C). Face loop AddPrim t9=a3+face_hi; look-up flaps face_hi≈0 → main-OT far (gpu ot_rank 0). Rain frame order: WoodBatchSetup (KART/LID* /GLOW/CODE/BOX_) → sibling → WoodEmit. CODE model stable 0x800FF390, GLOW 0x800FF294; each has own +228 OT (double-buffered ~0x800F1xxx/0x800F3xxx). Sharing CODE OT via OT_BATCH lands flaps in the digit bucket but DMA still walks flaps then 0x36 (digits on top) — same-bucket loses. CTR default: PSX_ND_SIB_FLAP_LAST skips additive 0x36 with signed-11 SX max>=280 only at OT ranks 1600..2099 (digit rain; menu 0x36 sits ~1066). Deferring/re-emitting wide 0x30 after the walk cut the right half empty. Gate: tools/nd_intro_flap_check.py. */
 #define PSX_FN_NdIntroSiblingRtptEmit 0x80069BB0u
 #define func_80069BB0 NdIntroSiblingRtptEmit  /* alias */
 

@@ -34,6 +34,12 @@ strict = true
 [runtime]
 window_title = "Crash Team Racing Recompiled"
 memcard_dir = "saves"
+# ND intro: PSX_ND_SIB_FLAP_LAST is opt-in only (dma.c). Default off — AVSZ3
+# MAC0 fix restores batch OT indices so flaps/rain sort without skipping 0x36;
+# FLAP_LAST=1 shreds the crate glow fountain. Do not apply the SX filter
+# globally (menu/char-select semis share SX>280).
+# Tests: ctest -R nd_intro_flap  (guards=hermetic; runtime needs disc, else SKIP)
+# Manual: python3 tools/nd_intro_flap_check.py --ctest [--probe] [--duck-port 4371]
 
 [video]
 renderer = "opengl"

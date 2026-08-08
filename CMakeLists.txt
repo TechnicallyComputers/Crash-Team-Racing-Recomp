@@ -29,3 +29,33 @@ psxrecomp_add_game_runtime(psx-runtime
     GEN_FULL_GLOB "generated/SCUS_944.26_full_*.c"
     CODEGEN_SETUP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/codegen_setup.c"
 )
+
+# --- CTR ND intro flap / digit-rain regressions --------------------------------
+enable_testing()
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    add_test(
+        NAME nd_intro_flap_guards
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_nd_intro_flap_guards.py
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+    add_test(
+        NAME nd_intro_flap_runtime
+        COMMAND ${Python3_EXECUTABLE}
+                ${CMAKE_CURRENT_SOURCE_DIR}/tools/nd_intro_flap_check.py
+                --ctest
+                --bin $<TARGET_FILE:psx-runtime>
+                --out ${CMAKE_BINARY_DIR}/nd_intro_flap_check
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+    # No legal disc / incomplete build → skip (not fail).
+    set_tests_properties(nd_intro_flap_runtime PROPERTIES
+        SKIP_RETURN_CODE 77
+        LABELS "disc;nd_intro"
+        TIMEOUT 180
+    )
+    set_tests_properties(nd_intro_flap_guards PROPERTIES
+        LABELS "hermetic;nd_intro"
+    )
+endif()

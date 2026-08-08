@@ -127,7 +127,7 @@ pc = 0x80069BB0
 name = "NdIntroSiblingRtptEmit"
 emit = false
 status = "confirmed"
-note = "Caller 0x80036F50. Loads RT from a1+40..56, ctc2 TR=0, a3=*(a1+244)+4092 (last slot of 1024-entry OT; a1+244 alternates 0x800F5D44/0x800F4D2C). Face loop AddPrim t9=a3+face_hi — look-up right flaps use face_hi≈0 → farthest bucket (gpu ot_rank 0) while additive 0x36 glow ranks ~1832, so glow blends over the flap. WoodEmit AVSZ ranks ~1200–2046. PSX_ND_SIB_OT_LIFT moves a3 (neg toward nearer); -1023 still before glow; -1024 wraps/corrupts OT."
+note = "Caller 0x80036F50. Loads RT from a1+40..56, ctc2 TR=0, a3=*(a1+244)+4092 (main OT last slot; a1+244 alternates 0x800F5D44/0x800F4D2C). Face loop AddPrim t9=a3+face_hi; look-up flaps face_hi≈0 → main-OT far (gpu ot_rank 0). Rain frame order: WoodBatchSetup (KART/LID*/GLOW/CODE/BOX_) → sibling → WoodEmit. CODE model stable 0x800FF390, GLOW 0x800FF294; each has own +228 OT (double-buffered ~0x800F1xxx/0x800F3xxx). Sharing CODE OT via OT_BATCH lands flaps in the digit bucket but DMA still walks flaps then 0x36 (digits on top) — same-bucket loses. PSX_ND_SIB_FLAP_LAST (opt-in): skip additive 0x36 with s11 SX max>=280 at OT 1600..2099 — shreds crate glow after AVSZ MAC0 fix; leave default off. Gate: tools/nd_intro_flap_check.py."
 
 [[site]]
 pc = 0x80069C34
@@ -262,13 +262,13 @@ note = "jal NdIntroMeshDrawEntry when (*(gp+0x340)+0x256C) & 0x1000. In ND scene
 pc = 0x8006AD88
 name = "NdIntroWoodEmitHelper"
 status = "confirmed"
-note = "PolyFT3(0x30)/PolyGT3(0x34|0x36) emit via jalr $s5 from WoodEmit. Table 0x8008A444. Exclusive helper during ND digit rain (AE90=0). Also emits green digit/glow GT3s (code 0x36) via NdIntroDigitRainCode36."
+note = "jalr $s5 from WoodEmit. OT: lw MAC0@44(at) (swc2 after AVSZ3), lw base@56(at)=model+228, index=MAC0>>17 (==OTZ>>5 only if MAC0 is unshifted ZSF3*sum — host AVSZ3 must not >>12 MAC0). Emits PolyFT3(0x30)/PolyGT3(0x34); falls into NdIntroDigitRainCode36 for 0x36. MENU Crash/trophy/banner: shifted-MAC0 bug collapsed all faces to slot 0. Batch OT ≠ sibling main OT."
 
 [[site]]
 pc = 0x8006AE34
 name = "NdIntroDigitRainCode36"
 status = "confirmed"
-note = "Inside WoodEmitHelper: lui 0x3600 → PolyGT3-raw-semi. Digit rain: ~50–105× 0x36, ot_rank~1070, tpage ABR=1 (B+F) from packet word (not stale E1). DigitGt4/DigitFx=0. Stars=0x68 dots ot=1. Glow OT before most wood (occludes OK). GL vs DS: green meanG≈match; residual ‘overpaint’ tracks short right-flap coverage at look-up (wood SX≤313), not ABR. axis5 D2 inclusive edges may still brighten shared semi seams (boundary meanG GL>DS)."
+note = "Inside WoodEmitHelper fallthrough: lui 0x3600 → PolyGT3-raw-semi. Digit rain ~80–105× 0x36 at ot_rank~1832 (CODE model+228 + MAC0>>17); ABR=1. Same-bucket OT_BATCH still walks flaps then 0x36 (head-insert after sibling can't win — digits AddPrim later but DMA shows flaps first / digits on top). High OT_IDX buries the fountain. Stars=0x68. Prefer correct AVSZ MAC0 (unshifted) over PSX_ND_SIB_FLAP_LAST — the skip shreds this fountain."
 
 [[site]]
 pc = 0x8006AE90
@@ -281,7 +281,7 @@ note = "Sibling helper in ptr table @0x8008A44C. Still count=0 during ND digit r
 pc = 0x8006AAF0
 name = "NdIntroWoodBatchSetup"
 status = "confirmed"
-note = "Per-model wood batch: a0=stream, ra==a2=model. Gates +184 &0x40 set / &0x80 clear. Helpers on model: +92=pre(C948) +96=emit(AD88) +100/+104 post; +EC=WoodEmit. ND tags: accept 'titl' flags=0x4F; reject 0x5CF (unnamed) + 'cras' (bit0x80). CLEAR80 raises accept ~50%→92% but wood SX still ≤280 — rejected models are NOT the right-flap band (MeshDraw PolyG4 still owns x>301)."
+note = "Per-model wood batch: a0=stream, ra==a2=model. Gates +184 &0x40 set / &0x80 clear. Helpers +92/+96=AD88 during rain; +228=batch OT base (live at entry — model RAM reused later). Rain stream order: KART×6, LID2/D/C/B/A, GLOW@0x800FF294, CODE@0x800FF390, BOX_×6, then sibling. Read +228 here (or CODE+228 at sibling) for OT_BATCH; do not dump models after the frame."
 
 
 [[site]]
