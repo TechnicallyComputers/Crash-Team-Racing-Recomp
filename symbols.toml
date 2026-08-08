@@ -9,3 +9,297 @@ name = "BootEntry"
 emit = false
 status = "guessed"
 note = "SYSTEM.CNF / EXE entry PC (probe seed)"
+
+[[func]]
+pc = 0x80074870
+name = "GpuPacketLinkTail"
+emit = false
+status = "guessed"
+note = "ND intro GP0 submit helper — stores DR_ENV-ish words then jr $ra; digit+mesh packets stamp store PC 0x800748B4"
+
+[[func]]
+pc = 0x800748B8
+name = "GpuPacketOrCode"
+emit = false
+status = "guessed"
+note = "Sibling of GpuPacketLinkTail; ORs 0x10000000 into packet word (semi/code bit helper)"
+
+[[site]]
+pc = 0x800444E8
+name = "NdIntroMeshDrawEntry"
+status = "confirmed"
+note = "lh $v0,0x4DC(gp) then fall into NdIntroMeshDraw. Caller 0x80037830 jal (scene bit *+9580 & 0x1000). Same rate as NdIntroSceneBitDraw 47D64 during ND."
+
+[[func]]
+pc = 0x800444EC
+name = "NdIntroMeshDraw"
+emit = false
+status = "guessed"
+note = "ND crate intro draw (2572B). RTPT→scratch→clip→PolyG4(0x38) only (code 56 @0x80044E04). GTE ra 0x80044580: SX~206..645, obj Vx~-3006..-306, TR=0/H=256. OT via NdIntroOtFar (rank 0). Right-band 0x38s are gray/white gouraud — GP0 has ZERO textured prims with xmax>301 (wood FT3/GT3 stop at 301). Digits 0x3C ot~4829 overpaint this band."
+
+[[func]]
+pc = 0x800440A0
+name = "NdIntroDrawDispatch"
+emit = false
+status = "confirmed"
+note = "Mode/dispatch leaf jal'd from NdIntroMeshDraw (link 0x80044580). gp+0x4D4 mode + gp+0x4D8 depth countdown → NdIntroOtBase / Mode1 / NdIntroOtFar. v0 → $fp for all PolyG4 AddPrims. Probe nd_intro=2 @ ND digits: 100% NdIntroOtFar (44154/44268=0); $fp=0x800FBD40 ≈ ot_base+0x1005."
+
+[[func]]
+pc = 0x80044154
+name = "NdIntroOtBase"
+emit = false
+status = "guessed"
+note = "Returns *(game+buf*4+0x18C8) OT base. game=*(0x8008D2AC), buf=game+0xC. Unused during ND digit window (count=0)."
+
+[[func]]
+pc = 0x80044268
+name = "NdIntroOtBaseMode1"
+emit = false
+status = "guessed"
+note = "Same OT-base load as NdIntroOtBase; mode==1 / mode2 fallthroughs. Unused during ND digit window (count=0)."
+
+[[func]]
+pc = 0x800441A8
+name = "NdIntroOtFar"
+emit = false
+status = "confirmed"
+note = "jr $ra with v0=*(game+0x25C)+0xFFC → ot_index 0x1005. Depth≤0 path (mode==0). Reverse-OT high→low: PolyG4 rank 0. Digits use ot_base+4/+16 (index 1/4) → nearest (rank~4829). Wood OTZ~0xB00..0x1007 sits with OtFar — digits overpaint by guest OT design."
+
+[[func]]
+pc = 0x8006A52C
+name = "NdIntroWoodEmit"
+emit = false
+status = "confirmed"
+note = "Live textured wood (396B). RTPT ra 0x8006A564 + RTPS ra 0x8006A69C. Digit-rain look-up: WoodEmit 0x34 SX≤~313 (TR≈(0,948,1992)/H=320) — this is only the inner band. Right-flap extent past ~313 is NdIntroSiblingRtptEmit PolyFT3(0x30) SX~390..595, not missing WoodEmit verts. Later rain SX grows as TR.z falls. MENU ~f3100 SX≤301 false-positive."
+
+[[func]]
+pc = 0x8006A6B8
+name = "NdIntroWoodEmitTwin"
+emit = false
+status = "guessed"
+note = "996B near-duplicate of NdIntroWoodEmit. Only reached via not-taken of bgez $zero @ 0x8006A6B0 — dead on MIPS. Keep labeled; do not hook."
+
+[[site]]
+pc = 0x8006A564
+name = "NdIntroWoodRtptRa"
+status = "confirmed"
+note = "Sticky GTE caller_ra for wood RTPT (jalr link before loading V2). Filter gte_ring_dump by this ra for wood tris."
+
+[[site]]
+pc = 0x8006A574
+name = "NdIntroWoodRtpt"
+status = "confirmed"
+note = "RTPT (cop2 0x30) in NdIntroWoodEmit."
+
+[[site]]
+pc = 0x8006A5A4
+name = "NdIntroWoodFlagSkip"
+status = "guessed"
+note = "bltz (FLAG<<13) → skip @ 0x8006A610."
+
+[[site]]
+pc = 0x8006A5B4
+name = "NdIntroWoodNclip"
+status = "guessed"
+note = "NCLIP; MAC0==0 / facing reject → 0x8006A610."
+
+[[site]]
+pc = 0x8006A610
+name = "NdIntroWoodSkip"
+status = "guessed"
+note = "Next-face hub: FLAG/NCLIP reject lands here; also jalr return after emit helper ($ra set @ 0x8006A608)."
+
+[[site]]
+pc = 0x8006A69C
+name = "NdIntroWoodRtpsRa"
+status = "confirmed"
+note = "Return target after jalr; hosts RTPS@0x8006A6AC then bgez $0 → 0x8006A57C (always). Not the RTPT ra."
+
+[[func]]
+pc = 0x800693C8
+name = "NdIntroMeshSiblingDraw"
+emit = false
+status = "confirmed"
+note = "Parent of GTE ras 0x80069C3C/60/84/A8. LIVE during digit-rain look-up (~f1274+): 176 RTPTs/frame, TR=0 via ctc2. Right-flap PolyFT3 via NdIntroSiblingRtptEmit (SX~390..595 FLAG=0). Linked at farthest OT bucket (gpu ot_rank 0) so additive 0x36 glow (~rank 1832) blends over them — looks like a short WoodEmit flap. WoodEmit 0x34 SX≤313 is the inner band only."
+
+[[func]]
+pc = 0x80069BB0
+name = "NdIntroSiblingRtptEmit"
+emit = false
+status = "confirmed"
+note = "Caller 0x80036F50. Loads RT from a1+40..56, ctc2 TR=0, a3=*(a1+244)+4092 (last slot of 1024-entry OT; a1+244 alternates 0x800F5D44/0x800F4D2C). Face loop AddPrim t9=a3+face_hi — look-up right flaps use face_hi≈0 → farthest bucket (gpu ot_rank 0) while additive 0x36 glow ranks ~1832, so glow blends over the flap. WoodEmit AVSZ ranks ~1200–2046. PSX_ND_SIB_OT_LIFT moves a3 (neg toward nearer); -1023 still before glow; -1024 wraps/corrupts OT."
+
+[[site]]
+pc = 0x80069C34
+name = "NdIntroSiblingFaceLoopJal"
+status = "confirmed"
+note = "jal NdIntroSiblingFaceLoop with a3=OT origin. PSX_ND_SIB_OT_LIFT debug hook."
+
+[[site]]
+pc = 0x80069CC4
+name = "NdIntroSiblingFaceLoop"
+status = "confirmed"
+note = "RTPT→outcode→AddPrim PolyFT3 (tag len 0x600). OT slot t9=s2=a3+(int16)(face>>16); no AVSZ."
+
+[[site]]
+pc = 0x80069C3C
+name = "NdIntroSiblingRtpsA"
+status = "confirmed"
+note = "Return/continue after face-loop jal; GTE ra stamp cluster with 69C60/84/A8."
+
+[[site]]
+pc = 0x80069C60
+name = "NdIntroSiblingRtpsB"
+status = "confirmed"
+note = "Sibling of NdIntroSiblingRtpsA."
+
+[[site]]
+pc = 0x80069C84
+name = "NdIntroSiblingRtpsC"
+status = "confirmed"
+note = "Sibling GTE ra; FLAG=0 right-flap band SX~390..619 during look-up."
+
+[[site]]
+pc = 0x80069CA8
+name = "NdIntroSiblingRtpsD"
+status = "confirmed"
+note = "Sibling GTE ra; also wide SX~966..1008 FLAG=0 faces (may fail later outcode)."
+
+[[site]]
+pc = 0x80036F50
+name = "NdIntroSiblingEmitCall"
+status = "guessed"
+note = "jal NdIntroSiblingRtptEmit; a1=s4+360, a0=*(s5+4), a2=*(s4+16)+116."
+
+[[func]]
+pc = 0x8006A8E0
+name = "NdIntroWoodVertLoad"
+emit = false
+status = "guessed"
+note = "jalr $s6 from WoodEmit; model+0xF0. Bitstream/delta decode into scratch — not raw SVECTOR at +C0."
+
+[[site]]
+pc = 0x80044580
+name = "NdIntroAfterDispatch"
+status = "confirmed"
+note = "Post-dispatch return; GTE stamps this ra on in-function RTPTs. Frame 3160: ~249 right-only tris (x>301..631), FLAG=0, TR=0/H=256/OFX=256. ~116 survive 512×216 outcode; clip rejects ~98 (x≥512) + ~35 (neg)."
+
+[[site]]
+pc = 0x80044854
+name = "NdIntroRtpt"
+status = "guessed"
+note = "First RTPT in NdIntroMeshDraw vertex batch (10× RTPT → scratch @ 1F800000)"
+
+[[site]]
+pc = 0x80044CA8
+name = "NdIntroClipOutcodeNeg"
+status = "confirmed"
+note = "bne: cull if all packed SXY share sign bits vs mask 0x80008000 (all X<0 or all Y<0) → skip emit @ 0x80044E58"
+
+[[site]]
+pc = 0x80044CD4
+name = "NdIntroClipOutcodeHi"
+status = "confirmed"
+note = "bne: cull if all verts outside hi box vs 0x00D80200 (x≥512 or y≥216) → 0x80044E58. Drops many right flaps (minx≥512)."
+
+[[site]]
+pc = 0x80044DB0
+name = "NdIntroPolyG4Emit"
+status = "confirmed"
+note = "PolyG4(0x38) emit via $fp=NdIntroOtFar. Shade bytes @sp+64/65 byte-splat to RGB (intentional grayscale). Hi outcode uses FB width 512 (not 640). Heavy right-band gray G4 + WoodEmit SX≤301 is the MAIN MENU checkered path (MeshDraw ra 44580), not the ND logo crate (which is full-width textured)."
+
+[[site]]
+pc = 0x80044D10
+name = "NdIntroPrimAllocCheck"
+status = "confirmed"
+note = "beq $t0,$zero → epilogue. pc_probe window: t0_zero=0 on all alloc hits — not the missing-flap cause."
+
+[[func]]
+pc = 0x80052F98
+name = "NdIntroDigitFx"
+emit = false
+status = "guessed"
+note = "ND digit/glow FX (4864B). Probe nd_intro=4 @ ND digits: entry count=0 while DigitGt4 0x80023094 fires — digit quads are built outside this function. Glow site 0x80053E10 also 0."
+
+[[site]]
+pc = 0x80053E10
+name = "NdIntroDigitGlowColor"
+status = "confirmed"
+note = "ori builds 0x38xxxxxx|C8FF green PolyG4 glow verts from stack XY."
+
+[[site]]
+pc = 0x800230F4
+name = "NdIntroDigitGt4Code"
+status = "guessed"
+note = "lui 0x3C00 into PolyGT4 header. MAIN MENU only (probe count=0 during ND digit rain ~f1350–1456). Real ND binary rain is NOT this path — see NdIntroDigitRainCode36."
+
+[[site]]
+pc = 0x80023180
+name = "NdIntroDigitGt4AddPrim"
+status = "confirmed"
+note = "AddPrim: sw masked prim→0(t7); $t7 is OT slot. Mid-block (no cyc_observe) — probe DigitGt4 entry 0x80023094 instead where $t7 is already set."
+
+[[site]]
+pc = 0x80053EB8
+name = "NdIntroDigitGlowAddPrim"
+status = "confirmed"
+note = "Glow PolyG4 link: lw a1,0x147C(game); AddPrim via a1. Mid-block; probe glow color site 0x80053E10 reads same OT head from game+0x147C."
+
+[[site]]
+pc = 0x8006A608
+name = "NdIntroWoodEmitJalr"
+status = "guessed"
+note = "jalr $s5 emit helper after AVSZ3. Digit-rain probe: count~18k, t0_zero~1.3k (~7%) — prim alloc miss skips some faces (not the sole SX≤313 cause; GTE ring itself maxes SX313). $t0 is alloc ptr."
+
+[[site]]
+pc = 0x80037830
+name = "NdIntroSceneMeshCall"
+status = "confirmed"
+note = "jal NdIntroMeshDrawEntry when (*(gp+0x340)+0x256C) & 0x1000. In ND scene frame loop; ra 0x80037838."
+
+
+[[site]]
+pc = 0x8006AD88
+name = "NdIntroWoodEmitHelper"
+status = "confirmed"
+note = "PolyFT3(0x30)/PolyGT3(0x34|0x36) emit via jalr $s5 from WoodEmit. Table 0x8008A444. Exclusive helper during ND digit rain (AE90=0). Also emits green digit/glow GT3s (code 0x36) via NdIntroDigitRainCode36."
+
+[[site]]
+pc = 0x8006AE34
+name = "NdIntroDigitRainCode36"
+status = "confirmed"
+note = "Inside WoodEmitHelper: lui 0x3600 → PolyGT3-raw-semi. Digit rain: ~50–105× 0x36, ot_rank~1070, tpage ABR=1 (B+F) from packet word (not stale E1). DigitGt4/DigitFx=0. Stars=0x68 dots ot=1. Glow OT before most wood (occludes OK). GL vs DS: green meanG≈match; residual ‘overpaint’ tracks short right-flap coverage at look-up (wood SX≤313), not ABR. axis5 D2 inclusive edges may still brighten shared semi seams (boundary meanG GL>DS)."
+
+[[site]]
+pc = 0x8006AE90
+name = "NdIntroWoodEmitHelperAlt"
+status = "confirmed"
+note = "Sibling helper in ptr table @0x8008A44C. Still count=0 during ND digit rain — not used."
+
+
+[[site]]
+pc = 0x8006AAF0
+name = "NdIntroWoodBatchSetup"
+status = "confirmed"
+note = "Per-model wood batch: a0=stream, ra==a2=model. Gates +184 &0x40 set / &0x80 clear. Helpers on model: +92=pre(C948) +96=emit(AD88) +100/+104 post; +EC=WoodEmit. ND tags: accept 'titl' flags=0x4F; reject 0x5CF (unnamed) + 'cras' (bit0x80). CLEAR80 raises accept ~50%→92% but wood SX still ≤280 — rejected models are NOT the right-flap band (MeshDraw PolyG4 still owns x>301)."
+
+
+[[site]]
+pc = 0x8006ACE0
+name = "NdIntroWoodHelperBound"
+status = "confirmed"
+note = "After delay-slot lw s5,96(ra). Probe: s5 always AD88 in ND; a2=model; faces @a2+200."
+
+
+[[site]]
+pc = 0x8006AD20
+name = "NdIntroWoodBatchNext"
+status = "confirmed"
+note = "Stream next: lw ra,0(a0); bgez $0 → WoodBatchSetup. Shared skip target for flag rejects."
+
+
+[[site]]
+pc = 0x8008A444
+name = "NdIntroWoodHelperTable"
+status = "confirmed"
+note = "ROM ptr table copied to scratch by 0x80071590 (at+196). [0]=AD88 [1]=B968 [2]=AE90 [3]=C778 [4]=BAD0 [5]=AD6C [6]=D670 [7]=D55C. Material desc+96 selects among these."
