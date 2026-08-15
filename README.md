@@ -1,5 +1,9 @@
 # Crash Team Racing  Recompiled
 
+## Disclaimer
+
+Crash Bash has critical issues we need to address by debugging and working on the psxrecomp project still, specifically the pause menu in game does not load any menu items at all, and you cannot exit or change levels from the menu soft locking you into a game loop.  When the game is stable it will be back on the catalog and released into the RetComM launcher.
+
 Static recompilation of **Crash Team Racing** built on
 [psxrecomp](https://github.com/mstan/psxrecomp) and
 [recomp-ui](https://github.com/mstan/recomp-ui).
