@@ -1,15 +1,15 @@
 {
   "format_version": 1,
   "game": {
-    "name": "Crash Team Racing",
+    "name": "Crash-Team-Racing-Recomp",
     "id": "SCUS-94426",
     "boot_exe": "SCUS_944.26"
   },
   "marketing": {
-    "description": "Crash Team Racing is a kart racing game featuring popular characters from the Crash Bandicoot series. The gameplay is very similar to other kart racing video games like Mario Kart: players have to choose a character and compete against the other racers on various racetracks. The story mode allows you to choose any one of the characters to complete all the main races and beat the ultimate boss Nitrous Oxide. Each of the main races are against 7 other AI competitors with 5 boss races. There are also a few arcade modes up to 4 players.",
-    "publisher": "Naughty Dog",
-    "year": "1999",
-    "region": "USA",
+    "description": "",
+    "publisher": "",
+    "year": "",
+    "region": "",
     "players": 4
   },
   "rom_identity": {
@@ -22,7 +22,8 @@
     "data_track": {
       "size": 605698800,
       "md5": "ab95bfca8a4bb3d90daa6519acf6e944",
-      "sha1": "1bb785082def3fe25f6b46be06d4eaf33c5bc772"
+      "sha1": "1bb785082def3fe25f6b46be06d4eaf33c5bc772",
+      "crc32": "9a742438"
     },
     "disc_fp": "27c53f623a85a12e9b885af598c19544df7ef8d651ff7d4e7a2685b004a23f1d"
   },

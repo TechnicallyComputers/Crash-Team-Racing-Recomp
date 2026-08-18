@@ -2,7 +2,7 @@
 # Review before shipping. Runtime quirks / overlay seeds still need hand work.
 
 [game]
-name = "Crash Team Racing"
+name = "Crash-Team-Racing-Recomp"
 id = "SCUS-94426"
 players = 4
 exe = "disc/SCUS_944.26"
@@ -25,6 +25,9 @@ known_md5 = [
 known_sha1 = [
   "1bb785082def3fe25f6b46be06d4eaf33c5bc772",
 ]
+known_crc32 = [
+  "9a742438",
+]
 
 [recompiler]
 seeds = "seeds/ghidra_funcs.txt"
@@ -32,26 +35,18 @@ out_dir = "generated"
 strict = true
 
 [runtime]
-window_title = "Crash Team Racing Recompiled"
+window_title = "Crash-Team-Racing-Recomp Recompiled"
 memcard_dir = "saves"
-# ND intro: PSX_ND_SIB_FLAP_LAST is opt-in only (dma.c). Default off — AVSZ3
-# MAC0 fix restores batch OT indices so flaps/rain sort without skipping 0x36;
-# FLAP_LAST=1 shreds the crate glow fountain. Do not apply the SX filter
-# globally (menu/char-select semis share SX>280).
-# Tests: ctest -R nd_intro_flap  (guards=hermetic; runtime needs disc, else SKIP)
-# Manual: python3 tools/nd_intro_flap_check.py --ctest [--probe] [--duck-port 4371]
 
 [video]
 renderer = "opengl"
 aspect_ratio = "4:3"
 
 [controller]
-default_mode = "analog"
-allow_hybrid = false
+default_mode = "digital"
 
 # Online mount gate: digests + track count + optional TOC fingerprint
 # (see docs/NETPLAY.md).
-multitap_analog = true
 [netplay]
 require_cue = true
 required_tracks = 1
