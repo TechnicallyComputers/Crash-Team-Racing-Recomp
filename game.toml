@@ -37,6 +37,11 @@ strict = true
 [runtime]
 window_title = "Crash-Team-Racing-Recomp Recompiled"
 memcard_dir = "saves"
+# Enable captured dirty-RAM overlays. Without this the runtime never
+# initializes the overlay cache pipeline, so every streamed overlay runs on
+# the dirty-RAM interpreter for every player (psxrecomp package_setup_host.sh
+# refuses to package a game.toml missing this key).
+overlay_cache = true
 
 [video]
 renderer = "opengl"
