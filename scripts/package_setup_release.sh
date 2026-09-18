@@ -52,4 +52,6 @@ exec bash "${PACKAGER}" \
   --project-file README.md \
   --project-dir seeds \
   --project-dir launcher_assets \
+  --project-dir tests \
+  --project-dir tools \
   "${EXTRA_PROJECT[@]}"
